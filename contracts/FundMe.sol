@@ -3,31 +3,46 @@ pragma solidity ^0.8.8;
 
 import "./PriceConverter.sol";
 
-error Unauthorized();
+error FundMe_NotOwner();
 
+/** @title Crowdfunding contract
+ * @author Forbes
+ * @notice A demo for funding contract
+ * @dev Implements a pricefeed
+ */
 contract FundMe {
+  // Type declarations
   // Attach the priceConverter to uint256
   using PriceConverter for uint256;
 
+  // State Variables
   //constant => cheaper gas
   uint256 public constant MINIMUM_USD = 10 * 1e18;
-
   address[] public funders;
   // Relate the address with the value funded
   mapping(address => uint256) public addressToAmountFunded;
-
   AggregatorV3Interface public priceFeed;
-
   address public immutable i_owner;
+
+  modifier onlyOwner() {
+    if (msg.sender != i_owner) {
+      revert FundMe_NotOwner();
+    }
+    // // Less gas efficient
+    // require(msg.sender == i_owner, "Sender is not owner!");
+    _;
+  }
 
   constructor(address priceFeedAddress) {
     i_owner = msg.sender;
     priceFeed = AggregatorV3Interface(priceFeedAddress);
   }
 
-  // Send ETH to the contract
+  /** @notice Send ETH to the contract
+   * @dev uses getConversionRate function from other contract
+   */
   function fund() public payable {
-    // a.getConversionRate() (a is considered the first parameter)
+    // msg.value.getConversionRate() (msg.value is considered the first parameter of the function)
     require(
       msg.value.getConversionRate(priceFeed) >= MINIMUM_USD,
       "Didn't send enough"
@@ -37,7 +52,9 @@ contract FundMe {
     addressToAmountFunded[msg.sender] = msg.value;
   }
 
-  // Withdraw funds from contract
+  /** @notice Withdraw funds from contract
+   * @dev resets the funders array
+   */
   function Withdraw() public onlyOwner {
     // Reset the funders array values
     for (uint256 funderIndex = 0; funderIndex < funders.length; funderIndex++) {
@@ -62,16 +79,6 @@ contract FundMe {
 
     // Reverts if not owner (modifier)
     revert();
-  }
-
-  // Function will do this before executing the code
-  modifier onlyOwner() {
-    if (msg.sender != i_owner) {
-      revert Unauthorized();
-    }
-    // // Less gas efficient
-    // require(msg.sender == i_owner, "Sender is not owner!");
-    _;
   }
 
   // What if someone send eth to the contract without the fund function?
