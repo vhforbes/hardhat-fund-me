@@ -23,30 +23,30 @@ describe("FundMe", async () => {
 
     describe("constructor", async () => {
         it("Set the aggregator address correctly", async () => {
-            const response = await fundMe.priceFeed()
+            const response = await fundMe.s_priceFeed()
             assert.equal(response, mockV3Aggregator.address)
         })
     })
 
-    describe("fund", async () => {
+    describe("Fund", async () => {
         it("fails if not enough eth", async () => {
             await expect(fundMe.fund()).to.be.reverted
         })
 
         it("updates the amount funded data sctructure", async () => {
             await fundMe.fund({ value: sendValue })
-            const response = await fundMe.addressToAmountFunded(deployer)
+            const response = await fundMe.s_addressToAmountFunded(deployer)
             assert.equal(response.toString(), sendValue.toString())
         })
 
         it("add funder to array", async () => {
             await fundMe.fund({ value: sendValue })
-            const response = await fundMe.funders("0")
+            const response = await fundMe.s_funders("0")
             assert.equal(response, deployer)
         })
     })
 
-    describe("withdraw", async () => {
+    describe("Withdraw", async () => {
         beforeEach(async () => {})
         it("withdraw eth from a single funder", async () => {
             //Arrange - send value to contract and get its balance
@@ -79,7 +79,8 @@ describe("FundMe", async () => {
                 endingDeplyerBalance.add(totalGas.toString())
             )
         })
-        it("withdraw eth from multiple funders", async () => {
+
+        it("withdraw eth from multiple s_funders", async () => {
             //Arrange - send money from different accounts and save
             //the contract and deployer balance
             const accounts = await ethers.getSigners()
@@ -117,17 +118,18 @@ describe("FundMe", async () => {
                 startingFundMeBalance.add(startingDeployerBalance).toString(),
                 endingDeplyerBalance.add(totalGas.toString())
             )
-            // Confirm that the funders array is clean (transaction should not occour)
-            await expect(fundMe.funders(0)).to.be.reverted
+            // Confirm that the s_funders array is clean (transaction should not occour)
+            await expect(fundMe.s_funders(0)).to.be.reverted
 
             // Checking if the address to ammount funded values are zero
             for (i = 1; i < accounts.length; i++) {
                 assert.equal(
-                    await fundMe.addressToAmountFunded(accounts[i].address),
+                    await fundMe.s_addressToAmountFunded(accounts[i].address),
                     0
                 )
             }
         })
+
         it("only allow owner to withdraw", async () => {
             // Connects to atacker account
             const accounts = await ethers.getSigners()
