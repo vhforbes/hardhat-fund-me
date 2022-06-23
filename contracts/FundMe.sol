@@ -49,7 +49,7 @@ contract FundMe {
     /** @notice Withdraw funds from contract
      *  @dev resets the s_funders array
      */
-    function Withdraw() public onlyOwner {
+    function Withdraw() public payable onlyOwner {
         for (
             uint256 funderIndex = 0;
             funderIndex < s_funders.length;
@@ -66,6 +66,24 @@ contract FundMe {
         }("");
 
         require(callSuccess, "Call failed");
+    }
+
+    function cheaperWithdraw() public payable onlyOwner {
+        // saved the s_funders to the memory so i can loop it without paying so much
+        address[] memory funders = s_funders;
+        for (uint256 i = 0; i < funders.length; i++) {
+            address funder = funders[i];
+            s_addressToAmountFunded[funder] = 0;
+        }
+
+        s_funders = new address[](0);
+
+        // (bool callSuccess, ) = payable(msg.sender).call{
+        //     value: address(this).balance
+        // }("");
+
+        (bool callSuccess, ) = i_owner.call{value: address(this).balance}("");
+        require(callSuccess);
     }
 
     // What if someone send eth to the contract without the fund function?
