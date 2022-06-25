@@ -27,26 +27,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         log: true,
         waitConfirmations: network.config.blockConfirmations || 1,
     })
-    // contract address =  fundMe.address
-
-    log("--------- Withdraw --------")
-
-    let fundMeContract = await ethers.getContract("FundMe", deployer)
-    let deposit = await fundMeContract.fund({
-        value: "1000000000000000000",
-    })
-
-    const balance = await fundMeContract.provider.getBalance(fundMe.address)
-
-    log(balance.toString())
-
-    const transactionResponse = await fundMeContract.Withdraw()
-
-    // const transactionReceipt = await transactionResponse.wait(1)
-
-    // const endingDeplyerBalance = await fundMeContract.provider.getBalance(
-    //     deployer
-    // )
 
     log("----------------------------------------------------------------")
     if (!devChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {

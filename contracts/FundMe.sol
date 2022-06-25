@@ -16,10 +16,10 @@ contract FundMe {
 
     // State Variables
     uint256 public constant MINIMUM_USD = 10 * 1e18;
-    address[] public s_funders;
-    mapping(address => uint256) public s_addressToAmountFunded;
-    AggregatorV3Interface public s_priceFeed;
-    address public immutable i_owner;
+    address private immutable i_owner;
+    address[] private s_funders;
+    mapping(address => uint256) private s_addressToAmountFunded;
+    AggregatorV3Interface private s_priceFeed;
 
     modifier onlyOwner() {
         if (msg.sender != i_owner) {
@@ -36,7 +36,7 @@ contract FundMe {
     /** @notice Send ETH to the contract
      *  @dev uses getConversionRate function from other contract
      */
-    function fund() public payable {
+    function Fund() public payable {
         require(
             msg.value.getConversionRate(s_priceFeed) >= MINIMUM_USD,
             "Didn't send enough"
@@ -69,8 +69,10 @@ contract FundMe {
     }
 
     function cheaperWithdraw() public payable onlyOwner {
-        // saved the s_funders to the memory so i can loop it without paying so much
+        // saved the s_funders to the memory so i can loop it without having to
+        // read from storage every time it loops
         address[] memory funders = s_funders;
+
         for (uint256 i = 0; i < funders.length; i++) {
             address funder = funders[i];
             s_addressToAmountFunded[funder] = 0;
@@ -86,13 +88,34 @@ contract FundMe {
         require(callSuccess);
     }
 
-    // What if someone send eth to the contract without the fund function?
+    //Getter functions to facilitate interaction with the contract
+    // and making the variables private result in cheaper gas!
+    function getOwner() public view returns (address) {
+        return i_owner;
+    }
 
+    function getFunder(uint256 index) public view returns (address) {
+        return s_funders[index];
+    }
+
+    function getAddressToAmmoutFunded(address funder)
+        public
+        view
+        returns (uint256)
+    {
+        return s_addressToAmountFunded[funder];
+    }
+
+    function getPriceFeed() public view returns (AggregatorV3Interface) {
+        return s_priceFeed;
+    }
+
+    // What if someone send eth to the contract without the fund function?
     receive() external payable {
-        fund();
+        Fund();
     }
 
     fallback() external payable {
-        fund();
+        Fund();
     }
 }

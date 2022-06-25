@@ -23,25 +23,23 @@ describe("FundMe", async () => {
 
     describe("constructor", async () => {
         it("Set the aggregator address correctly", async () => {
-            const response = await fundMe.s_priceFeed()
+            const response = await fundMe.getPriceFeed()
             assert.equal(response, mockV3Aggregator.address)
         })
     })
 
     describe("Fund", async () => {
         it("fails if not enough eth", async () => {
-            await expect(fundMe.fund()).to.be.revertedWith("Didn't send enough")
+            await expect(fundMe.Fund()).to.be.revertedWith("Didn't send enough")
         })
-
         it("updates the amount funded data sctructure", async () => {
-            await fundMe.fund({ value: sendValue })
-            const response = await fundMe.s_addressToAmountFunded(deployer)
+            await fundMe.Fund({ value: sendValue })
+            const response = await fundMe.getAddressToAmmoutFunded(deployer)
             assert.equal(response.toString(), sendValue.toString())
         })
-
         it("add funder to array", async () => {
-            await fundMe.fund({ value: sendValue })
-            const response = await fundMe.s_funders("0")
+            await fundMe.Fund({ value: sendValue })
+            const response = await fundMe.getFunder("0")
             assert.equal(response, deployer)
         })
     })
@@ -50,7 +48,7 @@ describe("FundMe", async () => {
         beforeEach(async () => {})
         it("withdraw eth from a single funder", async () => {
             //Arrange - send value to contract and get its balance
-            await fundMe.fund({ value: sendValue })
+            await fundMe.Fund({ value: sendValue })
 
             const startingFundMeBalance = await fundMe.provider.getBalance(
                 fundMe.address
@@ -85,12 +83,12 @@ describe("FundMe", async () => {
             //the contract and deployer balance
             const accounts = await ethers.getSigners()
 
-            for (let i = 1; i < accounts.length; i++) {
+            for (let i = 1; i < 6; i++) {
                 // Connect contract with the account and send a value to the contract
                 const fundMeConnectedContract = await fundMe.connect(
                     accounts[i]
                 )
-                await fundMeConnectedContract.fund({ value: sendValue })
+                await fundMeConnectedContract.Fund({ value: sendValue })
             }
             // get the balance from the contract and the deployer
             const startingFundMeBalance = await fundMe.provider.getBalance(
@@ -119,12 +117,12 @@ describe("FundMe", async () => {
                 endingDeplyerBalance.add(totalGas.toString())
             )
             // Confirm that the s_funders array is clean (transaction should not occour)
-            await expect(fundMe.s_funders(0)).to.be.reverted
+            await expect(fundMe.getFunder(0)).to.be.reverted
 
             // Checking if the address to ammount funded values are zero
             for (i = 1; i < accounts.length; i++) {
                 assert.equal(
-                    await fundMe.s_addressToAmountFunded(accounts[i].address),
+                    await fundMe.getAddressToAmmoutFunded(accounts[i].address),
                     0
                 )
             }
@@ -145,12 +143,12 @@ describe("FundMe", async () => {
             //the contract and deployer balance
             const accounts = await ethers.getSigners()
 
-            for (let i = 1; i < accounts.length; i++) {
+            for (let i = 1; i < 6; i++) {
                 // Connect contract with the account and send a value to the contract
                 const fundMeConnectedContract = await fundMe.connect(
                     accounts[i]
                 )
-                await fundMeConnectedContract.fund({ value: sendValue })
+                await fundMeConnectedContract.Fund({ value: sendValue })
             }
             // get the balance from the contract and the deployer
             const startingFundMeBalance = await fundMe.provider.getBalance(
@@ -179,12 +177,12 @@ describe("FundMe", async () => {
                 endingDeplyerBalance.add(totalGas.toString())
             )
             // Confirm that the s_funders array is clean (transaction should not occour)
-            await expect(fundMe.s_funders(0)).to.be.reverted
+            await expect(fundMe.getFunder(0)).to.be.reverted
 
             // Checking if the address to ammount funded values are zero
-            for (i = 1; i < accounts.length; i++) {
+            for (i = 1; i < 6; i++) {
                 assert.equal(
-                    await fundMe.s_addressToAmountFunded(accounts[i].address),
+                    await fundMe.getAddressToAmmoutFunded(accounts[i].address),
                     0
                 )
             }
