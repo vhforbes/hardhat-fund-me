@@ -90,6 +90,7 @@ contract FundMe {
 
     //Getter functions to facilitate interaction with the contract
     // and making the variables private result in cheaper gas!
+    // View / Pure functions
     function getOwner() public view returns (address) {
         return i_owner;
     }
