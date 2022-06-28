@@ -68,7 +68,7 @@ contract FundMe {
         require(callSuccess, "Call failed");
     }
 
-    function cheaperWithdraw() public payable onlyOwner {
+    function WithdrawCheaper() public payable onlyOwner {
         // saved the s_funders to the memory so i can loop it without having to
         // read from storage every time it loops
         address[] memory funders = s_funders;
@@ -112,11 +112,11 @@ contract FundMe {
     }
 
     // What if someone send eth to the contract without the fund function?
-    receive() external payable {
-        Fund();
-    }
+    // receive() external payable {
+    //     Fund();
+    // }
 
-    fallback() external payable {
-        Fund();
-    }
+    // fallback() external payable {
+    //     Fund();
+    // }
 }

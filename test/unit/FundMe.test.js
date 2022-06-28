@@ -167,7 +167,7 @@ const { devChains } = require("../../helper-hardhat-config")
                   const startingDeployerBalance =
                       await fundMe.provider.getBalance(deployer)
                   //Act - make a withdraw and save the new balances
-                  const transactionResponse = await fundMe.cheaperWithdraw()
+                  const transactionResponse = await fundMe.WithdrawCheaper()
                   const transactionReceipt = await transactionResponse.wait(1)
                   const { gasUsed, effectiveGasPrice } = transactionReceipt
                   const totalGas = gasUsed.mul(effectiveGasPrice) // mul = multiply
